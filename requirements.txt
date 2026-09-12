@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+python-multipart
+sqlalchemy
+alembic
+onnxruntime-openvino
+psutil
+Pillow
+numpy

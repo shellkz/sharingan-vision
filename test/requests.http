@@ -1,0 +1,222 @@
+### 變數
+@baseUrl = http://localhost:8000/v1
+@apiKey = 48c7fdb6b6f257f26f543aae0c5fd8e2424a32af15eb4d55bcc9cb3158cfe2c7
+
+### 0. 健康檢查: 查目前設定
+GET {{baseUrl}}/config
+Authorization: Bearer {{apiKey}}
+
+
+### ===== 第一階段: 只建立 peg =====
+
+### 1. 建立 peg entity
+# @name createPegEntity
+POST {{baseUrl}}/entities
+Authorization: Bearer {{apiKey}}
+Content-Type: application/json
+
+{"name": "peg"}
+
+### 2. 建立 blue instance(4 張樣本)
+# @name createPegBlue
+POST {{baseUrl}}/entities/{{createPegEntity.response.body.$.id}}/instances
+Authorization: Bearer {{apiKey}}
+Content-Type: multipart/form-data; boundary=----boundary
+
+------boundary
+Content-Disposition: form-data; name="name"
+
+blue
+------boundary
+Content-Disposition: form-data; name="images"; filename="peg_blue_1.jpg"
+Content-Type: image/jpeg
+
+< ./fixtures/peg_blue_1.jpg
+------boundary
+Content-Disposition: form-data; name="images"; filename="peg_blue_2.jpg"
+Content-Type: image/jpeg
+
+< ./fixtures/peg_blue_2.jpg
+------boundary
+Content-Disposition: form-data; name="images"; filename="peg_blue_3.jpg"
+Content-Type: image/jpeg
+
+< ./fixtures/peg_blue_3.jpg
+------boundary
+Content-Disposition: form-data; name="images"; filename="peg_blue_4.jpg"
+Content-Type: image/jpeg
+
+< ./fixtures/peg_blue_4.jpg
+------boundary--
+
+### 3. 建立 purple instance(4 張樣本)
+# @name createPegPurple
+POST {{baseUrl}}/entities/{{createPegEntity.response.body.$.id}}/instances
+Authorization: Bearer {{apiKey}}
+Content-Type: multipart/form-data; boundary=----boundary
+
+------boundary
+Content-Disposition: form-data; name="name"
+
+purple
+------boundary
+Content-Disposition: form-data; name="images"; filename="peg_purple_1.jpg"
+Content-Type: image/jpeg
+
+< ./fixtures/peg_purple_1.jpg
+------boundary
+Content-Disposition: form-data; name="images"; filename="peg_purple_2.jpg"
+Content-Type: image/jpeg
+
+< ./fixtures/peg_purple_2.jpg
+------boundary
+Content-Disposition: form-data; name="images"; filename="peg_purple_3.jpg"
+Content-Type: image/jpeg
+
+< ./fixtures/peg_purple_3.jpg
+------boundary
+Content-Disposition: form-data; name="images"; filename="peg_purple_4.jpg"
+Content-Type: image/jpeg
+
+< ./fixtures/peg_purple_4.jpg
+------boundary--
+
+### 4. 確認 peg entity 底下有 2 個 instance
+GET {{baseUrl}}/entities/{{createPegEntity.response.body.$.id}}
+Authorization: Bearer {{apiKey}}
+
+### 5. 辨識 scene_1(第一次)—— 理論上: peg(blue/purple)抓得到, 瓶蓋/硬幣/卡片/紙盒都應該是 unknown
+# @name recognizeScene1First
+POST {{baseUrl}}/recognize
+Authorization: Bearer {{apiKey}}
+Content-Type: multipart/form-data; boundary=----boundary
+
+------boundary
+Content-Disposition: form-data; name="file"; filename="scene_1.jpg"
+Content-Type: image/jpeg
+
+< ./fixtures/scene_1.jpg
+------boundary--
+
+### 6. 查剛剛那次辨識寫進 predictions 的紀錄
+GET {{baseUrl}}/predictions?status=pending_review
+Authorization: Bearer {{apiKey}}
+
+
+### ===== 第二階段: 加入 bottle_cap, 不重啟服務 =====
+
+### 7. 建立 bottle_cap entity
+# @name createCapEntity
+POST {{baseUrl}}/entities
+Authorization: Bearer {{apiKey}}
+Content-Type: application/json
+
+{"name": "bottle_cap"}
+
+### 8. 建立 green instance(2 張樣本)
+POST {{baseUrl}}/entities/{{createCapEntity.response.body.$.id}}/instances
+Authorization: Bearer {{apiKey}}
+Content-Type: multipart/form-data; boundary=----boundary
+
+------boundary
+Content-Disposition: form-data; name="name"
+
+green
+------boundary
+Content-Disposition: form-data; name="images"; filename="bottle_cap_green_1.jpg"
+Content-Type: image/jpeg
+
+< ./fixtures/bottle_cap_green_1.jpg
+------boundary
+Content-Disposition: form-data; name="images"; filename="bottle_cap_green_2.jpg"
+Content-Type: image/jpeg
+
+< ./fixtures/bottle_cap_green_2.jpg
+------boundary--
+
+### 9. 建立 red instance(2 張樣本)
+POST {{baseUrl}}/entities/{{createCapEntity.response.body.$.id}}/instances
+Authorization: Bearer {{apiKey}}
+Content-Type: multipart/form-data; boundary=----boundary
+
+------boundary
+Content-Disposition: form-data; name="name"
+
+red
+------boundary
+Content-Disposition: form-data; name="images"; filename="bottle_cap_red_1.jpg"
+Content-Type: image/jpeg
+
+< ./fixtures/bottle_cap_red_1.jpg
+------boundary
+Content-Disposition: form-data; name="images"; filename="bottle_cap_red_2.jpg"
+Content-Type: image/jpeg
+
+< ./fixtures/bottle_cap_red_2.jpg
+------boundary--
+
+### 10. 建立 white instance(2 張樣本)
+POST {{baseUrl}}/entities/{{createCapEntity.response.body.$.id}}/instances
+Authorization: Bearer {{apiKey}}
+Content-Type: multipart/form-data; boundary=----boundary
+
+------boundary
+Content-Disposition: form-data; name="name"
+
+white
+------boundary
+Content-Disposition: form-data; name="images"; filename="bottle_cap_white_1.jpg"
+Content-Type: image/jpeg
+
+< ./fixtures/bottle_cap_white_1.jpg
+------boundary
+Content-Disposition: form-data; name="images"; filename="bottle_cap_white_2.jpg"
+Content-Type: image/jpeg
+
+< ./fixtures/bottle_cap_white_2.jpg
+------boundary--
+
+### 11. 辨識同一張 scene_1(第二次)—— 理論上: peg 一樣抓得到, 瓶蓋這次也該抓到了, 硬幣/卡片/紙盒依然 unknown
+# @name recognizeScene1Second
+POST {{baseUrl}}/recognize
+Authorization: Bearer {{apiKey}}
+Content-Type: multipart/form-data; boundary=----boundary
+
+------boundary
+Content-Disposition: form-data; name="file"; filename="scene_1.jpg"
+Content-Type: image/jpeg
+
+< ./fixtures/scene_1.jpg
+------boundary--
+
+### 12. 換一張角度不同的 scene_2 再測一次, 交叉驗證同一批 instance 對不同拍攝角度的泛化
+POST {{baseUrl}}/recognize
+Authorization: Bearer {{apiKey}}
+Content-Type: multipart/form-data; boundary=----boundary
+
+------boundary
+Content-Disposition: form-data; name="file"; filename="scene_2.jpg"
+Content-Type: image/jpeg
+
+< ./fixtures/scene_2.jpg
+------boundary--
+
+### 13. 查全部 predictions, 應該有兩輪 scene_1 + 一輪 scene_2 的紀錄
+GET {{baseUrl}}/predictions
+Authorization: Bearer {{apiKey}}
+
+
+
+### 修正 peg_purple_1(sample id=5)
+PATCH {{baseUrl}}/samples/5
+Authorization: Bearer {{apiKey}}
+Content-Type: application/json
+
+{"bbox": [800.0, 1920.0, 2125.0, 2550.0]}
+
+### 修正 peg_purple_2(sample id=6)
+PATCH {{baseUrl}}/samples/6
+Authorization: Bearer {{apiKey}}
+Content-Type: application/json
+
+{"bbox": [600.0, 1460.0, 2170.0, 2875.0]}

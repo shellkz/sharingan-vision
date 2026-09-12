@@ -1,0 +1,15 @@
+label_name,bbox_x,bbox_y,bbox_width,bbox_height,image_name,image_width,image_height
+peg/purple,505,1067,847,376,scene_1.jpg,4000,3000
+peg/purple,887,1618,487,847,scene_1.jpg,4000,3000
+peg/blue,1373,358,737,444,scene_1.jpg,4000,3000
+peg/blue,1983,1398,715,726,scene_1.jpg,4000,3000
+cap/green,1391,938,368,358,scene_1.jpg,4000,3000
+cap/white,1819,989,358,366,scene_1.jpg,4000,3000
+cap/red,1733,1782,366,366,scene_1.jpg,4000,3000
+cap/white,2233,1758,376,363,scene_2.jpg,4000,3000
+cap/red,603,903,425,376,scene_2.jpg,4000,3000
+cap/green,1824,1113,379,374,scene_2.jpg,4000,3000
+peg/blue,1329,750,516,755,scene_2.jpg,4000,3000
+peg/blue,415,1290,634,726,scene_2.jpg,4000,3000
+peg/purple,859,1691,855,438,scene_2.jpg,4000,3000
+peg/purple,1655,1715,304,866,scene_2.jpg,4000,3000

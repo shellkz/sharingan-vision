@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+
+# 執行期資料(SQLite 檔案、上傳的圖片),不進版本控制
+data/
+
+# 模型權重:由環境變數指路徑、外部掛載/下載取得,不進版本控制(見 docs/辨識服務部署方案.md)
+models/*.onnx
+models/*.pt
