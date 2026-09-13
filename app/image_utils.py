@@ -4,7 +4,7 @@ import uuid
 from pathlib import Path
 
 from fastapi import UploadFile
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, ImageOps, UnidentifiedImageError
 
 from .config import ALLOWED_IMAGE_FORMATS, MAX_UPLOAD_BYTES, MAX_UPLOAD_LONG_EDGE
 from .errors import AppError
@@ -23,6 +23,10 @@ def load_and_validate_image(raw: bytes) -> Image.Image:
     if image.format not in ALLOWED_IMAGE_FORMATS:
         raise AppError(415, "unsupported_image_format", f"不支援的圖片格式: {image.format},僅支援 JPEG/PNG")
 
+    # 手機直拍常見: 感光元件是橫向存的, 靠 EXIF Orientation 標籤才知道要轉正,
+    # PIL 預設不會自動套用, 這裡烤進實際像素, 讓後面的 bbox 座標系跟人眼看到的一致。
+    image = ImageOps.exif_transpose(image)
+
     if max(image.size) > MAX_UPLOAD_LONG_EDGE:
         raise AppError(413, "image_too_large", f"圖片長邊超過上限 {MAX_UPLOAD_LONG_EDGE}px")
 
@@ -40,6 +44,7 @@ def save_image(raw: bytes, directory: Path) -> str:
     避免同一批圖片裡 jpg/png 混雜造成檔名比對麻煩。"""
     directory.mkdir(parents=True, exist_ok=True)
     filename = f"{uuid.uuid4().hex}.jpg"
-    image = Image.open(io.BytesIO(raw)).convert("RGB")
+    image = Image.open(io.BytesIO(raw))
+    image = ImageOps.exif_transpose(image).convert("RGB")
     image.save(directory / filename, format="JPEG")
     return filename
