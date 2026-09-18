@@ -39,15 +39,16 @@ async def recognize(
         crop_padding_ratio=config.crop_padding_ratio,
     )
 
+    predictions = []
     for r in results:
-        db.add(
-            RecognitionPrediction(
-                image_path=scan_filename,
-                predicted_instance_id=r.instance_id,
-                predicted_score=r.score,
-                predicted_bbox=list(r.bbox),
-            )
+        prediction = RecognitionPrediction(
+            image_path=scan_filename,
+            predicted_instance_id=r.instance_id,
+            predicted_score=r.score,
+            predicted_bbox=list(r.bbox),
         )
+        db.add(prediction)
+        predictions.append(prediction)
     db.commit()
 
     evict_old_scan_images(db)
@@ -63,7 +64,8 @@ async def recognize(
                 "entity_name": r.entity_name,
                 "score": r.score,
                 "meets_threshold": r.meets_threshold,
+                "prediction_id": p.id,
             }
-            for r in results
+            for r, p in zip(results, predictions)
         ],
     }
