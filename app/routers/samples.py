@@ -1,5 +1,6 @@
 import onnxruntime as ort
 from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from ..auth import require_api_key
@@ -28,6 +29,29 @@ async def add_sample(
     db.commit()
     db.refresh(sample)
     return {"id": sample.id, "instance_id": sample.instance_id, "bbox": sample.final_bbox, "created_at": sample.created_at}
+
+
+@router.get("/instances/{instance_id}/samples")
+def list_samples(instance_id: int, db: Session = Depends(get_db)):
+    get_or_404(db, RecognitionInstance, instance_id, "instance")
+    samples = (
+        db.query(RecognitionSample)
+        .filter(RecognitionSample.instance_id == instance_id)
+        .order_by(RecognitionSample.id)
+        .all()
+    )
+    return {
+        "result": [
+            {"id": s.id, "instance_id": s.instance_id, "bbox": s.final_bbox, "created_at": s.created_at}
+            for s in samples
+        ]
+    }
+
+
+@router.get("/samples/{sample_id}/image")
+def get_sample_image(sample_id: int, db: Session = Depends(get_db)):
+    sample = get_or_404(db, RecognitionSample, sample_id, "sample")
+    return FileResponse(SAMPLES_DIR / sample.image_path, media_type="image/jpeg")
 
 
 @router.patch("/samples/{sample_id}")
